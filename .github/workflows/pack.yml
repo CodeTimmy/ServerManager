@@ -1,0 +1,71 @@
+name: Build on new Draft
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  windows-zip:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Make Zip
+        run: |
+          mkdir ServerManager-Windows
+          cp -r windows/. ServerManager-Windows/
+          zip -r Windows.zip ServerManager-Windows
+          rm -rf ServerManager-Windows
+
+      - name: Save
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: Windows.zip
+
+  linux-zip:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Make Zip
+        run: |
+          mkdir ServerManager-Linux
+          cp -r linux/. ServerManager-Linux/
+          zip -r Linux.zip ServerManager-Linux
+          rm -rf ServerManager-Linux
+
+      - name: Save
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-zip
+          path: Linux.zip
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [windows-zip, linux-zip]
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/windows-zip/Windows.zip
+            artifacts/linux-zip/Linux.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
