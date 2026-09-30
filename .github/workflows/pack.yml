@@ -52,8 +52,10 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [windows-zip, linux-zip]
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' 
 
     steps:
       - name: Download all artifacts
