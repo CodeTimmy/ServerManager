@@ -8,6 +8,7 @@ threading.excepthook = _hook
 import time
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
+import psutil
 
 session = PromptSession()
 
@@ -38,10 +39,11 @@ def StdOut(folder):
             printInfo(Fore.RED + Style.BRIGHT + folder + " is dead!" + Style.RESET_ALL)
             time.sleep(1)
 
-def start(folder):
+def pstart(folder):
     if exiting:
         printInfo("Cannot start, while exiting!")
     else:
+        file = basedir / folder / "start.sh"
         printInfo("Starting " + folder)
         procs[folder] = subprocess.Popen(
             [file],
@@ -70,17 +72,18 @@ for folder in basedir.iterdir():
             file.write_bytes(data) # Linux fix, TODO: Fix permissions
             folders.append(folder.name)
             printInfo("Found!")
-            start(folder.name)
+            pstart(folder.name)
             threading.Thread(target=StdOut, args=(folder.name,), daemon=True).start()
 
 def restart_check():
-    while True:
-        for folder in folders:
-            p = procs[folder]
-            if not p.poll() is None:
-                printInfo(Fore.RED + Style.BRIGHT + folder + " exited with code " + str(p.returncode) + Style.RESET_ALL)
-                start(folder)
-                time.sleep(1)
+    #while True:
+    #    for folder in folders:
+    #        p = procs[folder]
+    #        if not p.poll() is None:
+    #            printInfo(Fore.RED + Style.BRIGHT + folder + " exited with code " + str(p.returncode) + Style.RESET_ALL)
+    #            pstart(folder)
+    #            time.sleep(1)
+    pass
 
 #def stop_exit():
 #    exiting = True
@@ -88,6 +91,13 @@ def restart_check():
 #        for folder in folders:
 #            p = procs[folder]
 #                if
+
+def kill(folder):
+    p = procs[folder]
+    parent = psutil.Process(p.pid)
+    for child in parent.children(recursive=True):
+        child.kill()
+    parent.kill()
 
 with patch_stdout(raw=True):
     while True:
@@ -100,15 +110,21 @@ with patch_stdout(raw=True):
             if usrinput == "list":
                 print("Not implemented!")
                 continue
-            if usrinput == "kill":
-                print("Not implemented!")
+            if usrinput.startswith("kill"):
+                if len(usrinput) >= 6 and usrinput.startswith("kill "):
+                    kill(usrinput.removeprefix("kill "))
+                else:
+                    printInfo("Correct usage: /kill [ServerName]")
                 continue
             #if usrinput == "exit":
             #    print("Stopping all Servers and exiting...")
             #    stop_exit()
             #    continue
-            if usrinput == "start":
-                print("Not implemented!")
+            if usrinput.startswith("start"):
+                if len(usrinput) >= 7 and usrinput.startswith("start "):
+                    pstart(usrinput.removeprefix("start "))
+                else:
+                    printInfo("Correct usage: /start [ServerName]")
                 continue
             print("Unknown Command: " + usrinput + ", use /help for more info!")
             continue
