@@ -21,3 +21,18 @@ Currently there is a **Linux issue**, where the program crashes cause of file pe
 - Keep Windows and Linux Version on the same Progress
 - Wiki
 - Everything You suggest
+
+# License:
+This project is under the GLP-3.0 License.
+### **You may**:
+- Use it commercially
+- Modify it
+- Distribute it
+### **As long as you**:
+- Provide license and copyright notice
+- State your changes
+- Disclose the source
+- Use the same license
+
+#
+Server Manager  Copyright (C) 2026  CodeTimmy
