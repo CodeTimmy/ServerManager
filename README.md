@@ -23,8 +23,8 @@ Currently there is a **Linux issue**, where the program crashes cause of file pe
 - Everything You suggest
 
 # License:
-This project is under the GLP-3.0 License.
-### **You may**:
+This project is licensed under the GLP-3.0 License.
+### **So you may**:
 - Use it commercially
 - Modify it
 - Distribute it
