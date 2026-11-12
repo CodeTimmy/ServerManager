@@ -9,6 +9,20 @@ import time
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
+print("Server Manager  Copyright (C) 2026  CodeTimmy")
+print("This program comes with ABSOLUTELY NO WARRANTY.")
+print("This is free software, and you are welcome to")
+print("redistribute it under the GPL-3.0 conditions.")
+print("-----------------------------------------------")
+print("More information:")
+print("https://github.com/CodeTimmy/ServerManager/blob/main/LICENSE")
+print("-----------------------------------------------")
+print("Feel free to report bugs and suggest features at")
+print("https://github.com/CodeTimmy/ServerManager/issues")
+print("")
+print("")
+print("")
+
 session = PromptSession()
 
 basedir = Path(__file__).resolve().parent
