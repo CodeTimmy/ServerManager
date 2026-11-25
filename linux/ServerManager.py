@@ -85,11 +85,12 @@ def addLog(text: str): # TODO: implement on Windows
         f.write("\n" + text)
     with open('logs/latest.log', 'r+', encoding='utf-8') as f:
         content = f.read()
-        if len(content) > 1000:
+        if len(content) > 1000000:
             localtime = time.localtime()
             time_now = f"{localtime[2]}-{localtime[1]}---{localtime[3]}-{localtime[4]}"
             with open(f"logs/{time_now}.log", 'w', encoding='utf-8') as f2:
                 f2.write(content)
+            f.seek(0)
             f.write(f"For older logs see: 'logs/{time_now}.log'")
             f.truncate()
 
