@@ -48,11 +48,11 @@ def StdOut(folder):
             style = Style.BRIGHT
 
         struct_time = time.struct_time(time.localtime)
-        time = f"{struct_time[2]}.{struct_time[1]} {struct_time[3]}:{struct_time[4]}:{struct_time[5]}"
+        time = f"{struct_time[2]}.{struct_time[1]} {struct_time[3]}:{struct_time[4]}:{struct_time[5]}" # TODO: implement on Windows
         
         if line:
             print(Fore.GREEN + style + "[" + folder + "] " + color + line + Style.RESET_ALL, end="")
-            addLog(f"[{time} | {folder}] {line}")
+            addLog(f"[{time} | {folder}] {line}") # TODO: implement on Windows
         else:
             printInfo(Fore.RED + Style.BRIGHT + folder + " is dead!" + Style.RESET_ALL)
             time.sleep(1)
@@ -117,7 +117,7 @@ def kill(folder):
         child.kill()
     parent.kill()
 
-def addLog(text: str):
+def addLog(text: str): # TODO: implement on Windows
     with open('logs/latest.log', 'a', encoding='utf-8') as f:
         f.write("\n" + text)
     with open('logs/latest.log', 'r+', encoding='utf-8') as f:
