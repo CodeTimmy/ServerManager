@@ -33,6 +33,8 @@ exiting = False
 
 def printInfo(msg):
     print(Fore.WHITE + "[INFO] " + str(msg)) # TODO: implement on Windows
+    localtime = time.localtime()
+    time_now = f"{localtime[2]}.{localtime[1]} {localtime[3]}:{localtime[4]}:{localtime[5]}" # TODO: implement on Windows
     addLog(f"[{time_now} | INFO] {str(msg)}")
 
 def StdOut(folder):
