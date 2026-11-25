@@ -47,7 +47,7 @@ def StdOut(folder):
             color = Fore.RED
             style = Style.BRIGHT
 
-        struct_time = time.struct_time(time.localtime)
+        struct_time = time.struct_time(time.localtime())
         time = f"{struct_time[2]}.{struct_time[1]} {struct_time[3]}:{struct_time[4]}:{struct_time[5]}" # TODO: implement on Windows
         
         if line:
@@ -123,7 +123,7 @@ def addLog(text: str): # TODO: implement on Windows
     with open('logs/latest.log', 'r+', encoding='utf-8') as f:
         content = f.read()
         if len(content) > 1000:
-            struct_time = time.struct_time(time.localtime)
+            struct_time = time.struct_time(time.localtime())
             time = f"{struct_time[2]}-{struct_time[1]}---{struct_time[3]}-{struct_time[4]}"
             with open(f"logs/{time}.log", 'w', encoding='utf-8') as f2:
                 f2.write(content)
