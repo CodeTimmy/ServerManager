@@ -9,6 +9,7 @@ import time
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 import psutil
+import os
 
 print("Server Manager  Copyright (C) 2026  CodeTimmy")
 print("This program comes with ABSOLUTELY NO WARRANTY.")
@@ -118,6 +119,7 @@ def kill(folder):
     parent.kill()
 
 def addLog(text: str): # TODO: implement on Windows
+    os.makedirs('logs', exist_ok=True)
     with open('logs/latest.log', 'a', encoding='utf-8') as f:
         f.write("\n" + text)
     with open('logs/latest.log', 'r+', encoding='utf-8') as f:
