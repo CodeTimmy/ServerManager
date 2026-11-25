@@ -33,6 +33,7 @@ exiting = False
 
 def printInfo(msg):
     print(Fore.WHITE + "[INFO] " + str(msg)) # TODO: implement on Windows
+    addLog(f"[{time_now} | INFO] {str(msg)}")
 
 def StdOut(folder):
     printInfo("Started " + folder + " StdOut")
@@ -78,11 +79,15 @@ def pstart(folder):
 
 procs = {}
 folders = []
+forbidden_folders = []
 for folder in basedir.iterdir():
     if folder.is_dir():
         printInfo("- " + folder.name)
         if folder.name.startswith("."):
             printInfo("Skipped!")
+            continue
+        if folder.name is in forbidden_folders:
+            printInfo("Skipped! (forbidden Name)")
             continue
         file = folder / "start.sh" # Small Linux changes
         if file.is_file():
