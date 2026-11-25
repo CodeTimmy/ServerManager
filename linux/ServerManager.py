@@ -79,15 +79,15 @@ def pstart(folder):
 
 procs = {}
 folders = []
-forbidden_folders = []
+forbidden_folders = ["config", "logs", ".local", ".cache"]
 for folder in basedir.iterdir():
     if folder.is_dir():
         printInfo("- " + folder.name)
+        if folder.name in forbidden_folders:
+            printInfo("Skipped! (forbidden Name)")
+            continue
         if folder.name.startswith("."):
             printInfo("Skipped!")
-            continue
-        if folder.name is in forbidden_folders:
-            printInfo("Skipped! (forbidden Name)")
             continue
         file = folder / "start.sh" # Small Linux changes
         if file.is_file():
