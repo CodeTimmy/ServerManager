@@ -47,8 +47,12 @@ def StdOut(folder):
             color = Fore.RED
             style = Style.BRIGHT
 
+        struct_time = time.struct_time(time.localtime)
+        time = f"{struct_time[2]}.{struct_time[1]} {struct_time[3]}:{struct_time[4]}:{struct_time[5]}"
+        
         if line:
             print(Fore.GREEN + style + "[" + folder + "] " + color + line + Style.RESET_ALL, end="")
+            addLog(f"[{time} | {folder}] {line}")
         else:
             printInfo(Fore.RED + Style.BRIGHT + folder + " is dead!" + Style.RESET_ALL)
             time.sleep(1)
@@ -112,6 +116,19 @@ def kill(folder):
     for child in parent.children(recursive=True):
         child.kill()
     parent.kill()
+
+def addLog(text: str):
+    with open('logs/latest.log', 'a', encoding='utf-8') as f:
+        f.write("\n" + text)
+    with open('logs/latest.log', 'r+', encoding='utf-8') as f:
+        content = f.read()
+        if len(content) > 1000:
+            struct_time = time.struct_time(time.localtime)
+            time = f"{struct_time[2]}-{struct_time[1]}---{struct_time[3]}-{struct_time[4]}"
+            with open(f"logs/{time}.log", 'w', encoding='utf-8') as f2:
+                f2.write(content)
+            f.write(f"For older logs see: 'logs/{time}.log'")
+            f.truncate()
 
 with patch_stdout(raw=True):
     while True:
