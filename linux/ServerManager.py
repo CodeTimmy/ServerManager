@@ -11,6 +11,11 @@ from prompt_toolkit.patch_stdout import patch_stdout
 import psutil
 import os
 
+# TODO: Move to settings
+DoubbleNL_Console = "auto"
+DoubbleNL_Log = "True"
+MaxLogSize = int("100000")
+
 print("Server Manager  Copyright (C) 2026  CodeTimmy")
 print("This program comes with ABSOLUTELY NO WARRANTY.")
 print("This is free software, and you are welcome to")
@@ -31,13 +36,30 @@ basedir = Path(__file__).resolve().parent
 
 exiting = False
 
-def printInfo(msg):
-    print(Fore.WHITE + "[INFO] " + str(msg)) # TODO: implement on Windows
+last_log_source = "None"
+
+def parse_time_digit(digit):
+    if int(digit) in range(10):
+        return(f"0{str(digit)}")
+    else:
+        return(str(digit))
+
+def time_now():
     localtime = time.localtime()
-    time_now = f"{localtime[2]}.{localtime[1]} {localtime[3]}:{localtime[4]}:{localtime[5]}" # TODO: implement on Windows
-    addLog(f"[{time_now} | INFO] {str(msg)}")
+    time_f = f"{parse_time_digit(localtime[2])}.{parse_time_digit(localtime[1])}.{localtime[0]}-{parse_time_digit(localtime[3])}:{parse_time_digit(localtime[4])}:{parse_time_digit(localtime[5])}" # TODO: implement on Windows
+    return time_f
+
+def printInfo(msg): # TODO: implement on Windows
+    global last_log_source
+    if (DoubbleNL_Console.lower() == "true") or ((DoubbleNL_Console.lower() == "auto") and (last_log_source != "INFO")):
+        print("\n" + Fore.WHITE + "[INFO] " + str(msg))
+    else:
+        print(Fore.WHITE + "[INFO] " + str(msg))
+    addLog(f"[{time_now()} | INFO] {str(msg)}\n")
+    last_log_source = "INFO"
 
 def StdOut(folder):
+    global last_log_source
     printInfo("Started " + folder + " StdOut")
     while True:
         p = procs[folder]
@@ -50,13 +72,14 @@ def StdOut(folder):
         if "ERROR" in line:
             color = Fore.RED
             style = Style.BRIGHT
-
-        localtime = time.localtime()
-        time_now = f"{localtime[2]}.{localtime[1]} {localtime[3]}:{localtime[4]}:{localtime[5]}" # TODO: implement on Windows
         
         if line:
-            print(Fore.GREEN + style + "[" + folder + "] " + color + line + Style.RESET_ALL, end="")
-            addLog(f"[{time_now} | {folder}] {line}") # TODO: implement on Windows
+            if (DoubbleNL_Console.lower() == "true") or ((DoubbleNL_Console.lower() == "auto") and (last_log_source != folder)):
+                print("\n" + Fore.GREEN + style + "[" + folder.upper() + "] " + color + line + Style.RESET_ALL, end="")
+            else:
+                print(Fore.GREEN + style + "[" + folder.upper() + "] " + color + line + Style.RESET_ALL, end="")
+            addLog(f"[{time_now()} | {folder.upper()}] {line}") # TODO: implement on Windows
+            last_log_source = folder
         else:
             printInfo(Fore.RED + Style.BRIGHT + folder + " is dead!" + Style.RESET_ALL)
             time.sleep(1)
@@ -66,7 +89,7 @@ def pstart(folder):
         printInfo("Cannot start, while exiting!")
     else:
         file = basedir / folder / "start.sh"
-        printInfo("Starting " + folder)
+        printInfo("Starting " + folder.upper())
         procs[folder] = subprocess.Popen(
             [file],
             cwd=folder,
@@ -80,28 +103,45 @@ def pstart(folder):
         )
 
 def addLog(text: str): # TODO: implement on Windows
-    os.makedirs('logs', exist_ok=True)
-    with open('logs/latest.log', 'a', encoding='utf-8') as f:
-        f.write("\n" + text)
-    with open('logs/latest.log', 'r+', encoding='utf-8') as f:
+    global last_log_source
+    os.makedirs('.LOGS', exist_ok=True)
+    with open('.LOGS/latest.log', 'a', encoding='utf-8') as f:
+        if DoubbleNL_Log.lower() == "true":
+            f.write("\n" + text)
+        else:
+            f.write(text)
+    with open('.LOGS/latest.log', 'r+', encoding='utf-8') as f:
         content = f.read()
-        if len(content) > 1000000:
+        if len(content) > MaxLogSize:
             localtime = time.localtime()
-            time_now = f"{localtime[2]}-{localtime[1]}---{localtime[3]}-{localtime[4]}"
-            with open(f"logs/{time_now}.log", 'w', encoding='utf-8') as f2:
+            time_formated = f"{parse_time_digit(localtime[2])}-{parse_time_digit(localtime[1])}-{localtime[0]} {parse_time_digit(localtime[3])}-{parse_time_digit(localtime[4])}-{parse_time_digit(localtime[5])}"
+            with open(f".LOGS/{time_formated}.log", 'w', encoding='utf-8') as f2:
                 f2.write(content)
             f.seek(0)
-            f.write(f"For older logs see: 'logs/{time_now}.log'")
+            f.write(f"For older logs see: '.LOGS/{time_formated}.log'\n")
             f.truncate()
+            if (DoubbleNL_Console.lower() == "true") or ((DoubbleNL_Console.lower() == "auto") and (last_log_source != "INFO")):
+                print("\n" + Fore.WHITE + "[INFO] " + "Split Logfile!")
+            else:
+                print(Fore.WHITE + "[INFO] " + "Split Logfile!")
+            last_log_source = "INFO"
+
+addLog(f"[{time_now()} | INFO] ---------------S-T-A-R-T-E-D---------------\n")
 
 procs = {}
 folders = []
-forbidden_folders = ["config", "logs", ".local", ".cache"]
+forbidden_folders = [
+    "config", "logs", "local", "cache", "info", "input",
+    ".config", ".logs", ".local", ".cache", ".info", ".input"
+]
 for folder in basedir.iterdir():
     if folder.is_dir():
         printInfo("- " + folder.name)
-        if folder.name in forbidden_folders:
+        if folder.name.lower() in forbidden_folders:
             printInfo("Skipped! (forbidden Name)")
+            continue
+        if not folder.name == folder.name.lower():
+            printInfo("Skipped! (ERROR: ALL folder Names MUST be lowercase!)")
             continue
         if folder.name.startswith("."):
             printInfo("Skipped!")
@@ -143,13 +183,19 @@ def kill(folder):
 with patch_stdout(raw=True):
     while True:
         usrinput = session.prompt("> ")
+        if (DoubbleNL_Console.lower() == "true"):
+            print("\n" + Fore.BLUE + "[INPUT] " + usrinput)
+        else:
+            print(Fore.BLUE + "[INPUT] " + usrinput)
+        addLog(f"[{time_now()} | INPUT] {usrinput}\n")
+        last_log_source = "INFO"
         if usrinput.startswith(".") or usrinput.startswith("/"):
-            usrinput = usrinput.removeprefix(".").removeprefix("/")
+            usrinput = usrinput.removeprefix(".").removeprefix("/").lower()
             if usrinput == "help":
-                print("Not implemented!")
+                printInfo("Not implemented!")
                 continue
             if usrinput == "list":
-                print("Not implemented!")
+                printInfo("Not implemented!")
                 continue
             if usrinput.startswith("kill"):
                 if len(usrinput) >= 6 and usrinput.startswith("kill "):
@@ -167,7 +213,7 @@ with patch_stdout(raw=True):
                 else:
                     printInfo("Correct usage: /start [ServerName]")
                 continue
-            print("Unknown Command: " + usrinput + ", use /help for more info!")
+            printInfo("Unknown Command: " + usrinput + ", use /help for more info!")
             continue
         if usrinput.startswith("#"):
             for folder in folders:
@@ -184,4 +230,4 @@ with patch_stdout(raw=True):
                 found = True
                 break
         if not found:
-            print("Unknown Program/Server: " + usrinput + ", use /help or /list for more info!")
+            printInfo("Unknown Program/Server: " + usrinput + ", use /help or /list for more info!")
