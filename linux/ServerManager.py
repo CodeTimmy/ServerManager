@@ -47,12 +47,12 @@ def StdOut(folder):
             color = Fore.RED
             style = Style.BRIGHT
 
-        struct_time = time.struct_time(time.localtime())
-        time = f"{struct_time[2]}.{struct_time[1]} {struct_time[3]}:{struct_time[4]}:{struct_time[5]}" # TODO: implement on Windows
+        localtime = time.localtime()
+        time_now = f"{localtime[2]}.{localtime[1]} {localtime[3]}:{localtime[4]}:{localtime[5]}" # TODO: implement on Windows
         
         if line:
             print(Fore.GREEN + style + "[" + folder + "] " + color + line + Style.RESET_ALL, end="")
-            addLog(f"[{time} | {folder}] {line}") # TODO: implement on Windows
+            addLog(f"[{time_now} | {folder}] {line}") # TODO: implement on Windows
         else:
             printInfo(Fore.RED + Style.BRIGHT + folder + " is dead!" + Style.RESET_ALL)
             time.sleep(1)
@@ -123,11 +123,11 @@ def addLog(text: str): # TODO: implement on Windows
     with open('logs/latest.log', 'r+', encoding='utf-8') as f:
         content = f.read()
         if len(content) > 1000:
-            struct_time = time.struct_time(time.localtime())
-            time = f"{struct_time[2]}-{struct_time[1]}---{struct_time[3]}-{struct_time[4]}"
-            with open(f"logs/{time}.log", 'w', encoding='utf-8') as f2:
+            localtime = time.localtime()
+            time_now = f"{struct_time[2]}-{struct_time[1]}---{struct_time[3]}-{struct_time[4]}"
+            with open(f"logs/{time_now}.log", 'w', encoding='utf-8') as f2:
                 f2.write(content)
-            f.write(f"For older logs see: 'logs/{time}.log'")
+            f.write(f"For older logs see: 'logs/{time_now}.log'")
             f.truncate()
 
 with patch_stdout(raw=True):
