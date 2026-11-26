@@ -10,6 +10,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 import psutil
 import os
+import tarfile
 
 # TODO: Move to settings
 DoubbleNL_Console = "auto"
@@ -180,6 +181,22 @@ def kill(folder):
         child.kill()
     parent.kill()
 
+def backup():
+    localtime = time.localtime()
+    time_formated = f"{parse_time_digit(localtime[2])}-{parse_time_digit(localtime[1])}-{localtime[0]} {parse_time_digit(localtime[3])}-{parse_time_digit(localtime[4])}-{parse_time_digit(localtime[5])}"
+    cwd = Path.cwd()
+    archive = (cwd / f"{time_formated}.tar.gz").resolve()
+
+    def skip_self(info: tarfile.TarInfo):
+        # info.name ist relativ, z.B. "./backup.tar.gz"
+        member = (cwd / info.name).resolve()
+        printInfo(f"backing up {member}...")
+        return None if member == archive else info
+
+    with tarfile.open(archive, "w:gz") as tar:
+        tar.add(cwd, arcname=".", filter=skip_self)
+    printInfo(f"Backup successfull!")
+
 with patch_stdout(raw=True):
     while True:
         usrinput = session.prompt("> ")
@@ -212,6 +229,10 @@ with patch_stdout(raw=True):
                     pstart(usrinput.removeprefix("start "))
                 else:
                     printInfo("Correct usage: /start [ServerName]")
+                continue
+            if usrinput == "backup":
+                printInfo("Backing up all folders...")
+                backup()
                 continue
             printInfo("Unknown Command: " + usrinput + ", use /help for more info!")
             continue
